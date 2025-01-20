@@ -16,7 +16,7 @@ const App = () => {
           <Link to="/transportations" className="nav-link">
             Transportations
           </Link>
-          <Link to="/routes" className="nav-link">
+          <Link to="/routess" className="nav-link">
             Routes
           </Link>
         </nav>
