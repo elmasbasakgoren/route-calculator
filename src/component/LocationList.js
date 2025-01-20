@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getLocations, addLocation, deleteLocation } from "../services/api";
+import { getLocations, addLocation, deleteLocation, updateLocation } from "../services/api";
 
 const LocationList = () => {
   const [locations, setLocations] = useState([]);
@@ -9,8 +9,9 @@ const LocationList = () => {
     city: "",
     locationCode: "",
   });
+  const [editLocation, setEditLocation] = useState(null); // Düzenlenecek lokasyon bilgisi
+  const [showEditModal, setShowEditModal] = useState(false); // Modal görünürlüğü
 
-  // Lokasyonları yükleme
   useEffect(() => {
     fetchLocations();
   }, []);
@@ -18,115 +19,146 @@ const LocationList = () => {
   const fetchLocations = async () => {
     try {
       const response = await getLocations();
-      setLocations(response.data); // Lokasyonları state'e kaydet
+      setLocations(response.data);
     } catch (error) {
       console.error("Error fetching locations:", error);
-      alert("Failed to fetch locations.");
     }
   };
 
-  // Yeni lokasyon ekleme
   const handleAddLocation = async (e) => {
     e.preventDefault();
     try {
       await addLocation(newLocation);
-      alert("Location added successfully!");
       setNewLocation({ name: "", country: "", city: "", locationCode: "" });
-      fetchLocations(); // Listeyi güncelle
+      fetchLocations();
     } catch (error) {
       console.error("Error adding location:", error);
-      alert("Failed to add location. " + (error.response?.data || "Unknown error"));
     }
   };
 
-  // Lokasyon silme
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this location?")) {
-      return; // Kullanıcı işlemi iptal etti
-    }
+    if (!window.confirm("Are you sure you want to delete this location?")) return;
     try {
       await deleteLocation(id);
-      alert("Location deleted successfully!");
-      fetchLocations(); // Listeyi güncelle
+      fetchLocations();
     } catch (error) {
       console.error("Error deleting location:", error);
-      alert("Failed to delete location.");
     }
   };
 
-  // Form girişlerini yönetme
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setNewLocation({ ...newLocation, [name]: value });
+  const handleUpdate = async () => {
+    try {
+      await updateLocation(editLocation.id, editLocation);
+      setShowEditModal(false);
+      setEditLocation(null);
+      fetchLocations();
+    } catch (error) {
+      console.error("Error updating location:", error);
+    }
+  };
+
+  const openEditModal = (location) => {
+    setEditLocation(location); // Seçilen lokasyon bilgisi
+    setShowEditModal(true);
+  };
+
+  const closeEditModal = () => {
+    setEditLocation(null);
+    setShowEditModal(false);
   };
 
   return (
     <div>
       <h2>Locations</h2>
 
-      {/* Lokasyon ekleme formu */}
+      {/* Yeni Lokasyon Ekleme */}
       <form onSubmit={handleAddLocation}>
-        <label>
-          Name:
-          <input
-            type="text"
-            name="name"
-            value={newLocation.name}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <br />
-        <label>
-          Country:
-          <input
-            type="text"
-            name="country"
-            value={newLocation.country}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <br />
-        <label>
-          City:
-          <input
-            type="text"
-            name="city"
-            value={newLocation.city}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <br />
-        <label>
-          Location Code:
-          <input
-            type="text"
-            name="locationCode"
-            value={newLocation.locationCode}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <br />
+        <input
+          type="text"
+          name="name"
+          value={newLocation.name}
+          onChange={(e) => setNewLocation({ ...newLocation, name: e.target.value })}
+          placeholder="Name"
+          required
+        />
+        <input
+          type="text"
+          name="country"
+          value={newLocation.country}
+          onChange={(e) => setNewLocation({ ...newLocation, country: e.target.value })}
+          placeholder="Country"
+          required
+        />
+        <input
+          type="text"
+          name="city"
+          value={newLocation.city}
+          onChange={(e) => setNewLocation({ ...newLocation, city: e.target.value })}
+          placeholder="City"
+          required
+        />
+        <input
+          type="text"
+          name="locationCode"
+          value={newLocation.locationCode}
+          onChange={(e) => setNewLocation({ ...newLocation, locationCode: e.target.value })}
+          placeholder="Location Code"
+          required
+        />
         <button type="submit">Add Location</button>
       </form>
 
-      {/* Lokasyon listesi */}
+      {/* Lokasyon Listesi */}
       <ul>
         {locations.map((loc) => (
           <li key={loc.id}>
             {`${loc.name} - ${loc.city}, ${loc.country} (${loc.locationCode})`}
-            <button
-              style={{ marginLeft: "10px", color: "red" }}
-              onClick={() => handleDelete(loc.id)}
-            >
-              Delete
-            </button>
+            <button onClick={() => openEditModal(loc)}>Edit</button>
+            <button onClick={() => handleDelete(loc.id)}>Delete</button>
           </li>
         ))}
       </ul>
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="modal">
+          <h3>Edit Location</h3>
+          <input
+            type="text"
+            name="name"
+            value={editLocation.name}
+            onChange={(e) => setEditLocation({ ...editLocation, name: e.target.value })}
+            placeholder="Name"
+            required
+          />
+          <input
+            type="text"
+            name="country"
+            value={editLocation.country}
+            onChange={(e) => setEditLocation({ ...editLocation, country: e.target.value })}
+            placeholder="Country"
+            required
+          />
+          <input
+            type="text"
+            name="city"
+            value={editLocation.city}
+            onChange={(e) => setEditLocation({ ...editLocation, city: e.target.value })}
+            placeholder="City"
+            required
+          />
+          <input
+            type="text"
+            name="locationCode"
+            value={editLocation.locationCode}
+            onChange={(e) => setEditLocation({ ...editLocation, locationCode: e.target.value })}
+            placeholder="Location Code"
+            required
+          />
+          <button onClick={handleUpdate}>Save</button>
+          <button onClick={closeEditModal}>Cancel</button>
+        </div>
+      )}
     </div>
   );
 };
