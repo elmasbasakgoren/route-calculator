@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getLocations, addLocation, deleteLocation, updateLocation } from "../services/api";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const LocationList = () => {
   const [locations, setLocations] = useState([]);
@@ -9,8 +10,8 @@ const LocationList = () => {
     city: "",
     locationCode: "",
   });
-  const [editLocation, setEditLocation] = useState(null); // Düzenlenecek lokasyon bilgisi
-  const [showEditModal, setShowEditModal] = useState(false); // Modal görünürlüğü
+  const [editLocation, setEditLocation] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     fetchLocations();
@@ -58,7 +59,7 @@ const LocationList = () => {
   };
 
   const openEditModal = (location) => {
-    setEditLocation(location); // Seçilen lokasyon bilgisi
+    setEditLocation(location);
     setShowEditModal(true);
   };
 
@@ -68,95 +69,164 @@ const LocationList = () => {
   };
 
   return (
-    <div>
-      <h2>Locations</h2>
+    <div className="container mt-4">
+      <h2 className="mb-4">Locations</h2>
 
-      {/* Yeni Lokasyon Ekleme */}
-      <form onSubmit={handleAddLocation}>
-        <input
-          type="text"
-          name="name"
-          value={newLocation.name}
-          onChange={(e) => setNewLocation({ ...newLocation, name: e.target.value })}
-          placeholder="Name"
-          required
-        />
-        <input
-          type="text"
-          name="country"
-          value={newLocation.country}
-          onChange={(e) => setNewLocation({ ...newLocation, country: e.target.value })}
-          placeholder="Country"
-          required
-        />
-        <input
-          type="text"
-          name="city"
-          value={newLocation.city}
-          onChange={(e) => setNewLocation({ ...newLocation, city: e.target.value })}
-          placeholder="City"
-          required
-        />
-        <input
-          type="text"
-          name="locationCode"
-          value={newLocation.locationCode}
-          onChange={(e) => setNewLocation({ ...newLocation, locationCode: e.target.value })}
-          placeholder="Location Code"
-          required
-        />
-        <button type="submit">Add Location</button>
+      {/* Add Location Form */}
+      <form className="row g-3 mb-4" onSubmit={handleAddLocation}>
+        <div className="col-md-3">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Name"
+            value={newLocation.name}
+            onChange={(e) => setNewLocation({ ...newLocation, name: e.target.value })}
+            required
+          />
+        </div>
+        <div className="col-md-3">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Country"
+            value={newLocation.country}
+            onChange={(e) => setNewLocation({ ...newLocation, country: e.target.value })}
+            required
+          />
+        </div>
+        <div className="col-md-3">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="City"
+            value={newLocation.city}
+            onChange={(e) => setNewLocation({ ...newLocation, city: e.target.value })}
+            required
+          />
+        </div>
+        <div className="col-md-2">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Location Code"
+            value={newLocation.locationCode}
+            onChange={(e) => setNewLocation({ ...newLocation, locationCode: e.target.value })}
+            required
+          />
+        </div>
+        <div className="col-md-1">
+          <button type="submit" className="btn btn-primary w-100">
+            Add
+          </button>
+        </div>
       </form>
 
-      {/* Lokasyon Listesi */}
-      <ul>
-        {locations.map((loc) => (
-          <li key={loc.id}>
-            {`${loc.name} - ${loc.city}, ${loc.country} (${loc.locationCode})`}
-            <button onClick={() => openEditModal(loc)}>Edit</button>
-            <button onClick={() => handleDelete(loc.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
+      {/* Locations Table */}
+      <table className="table table-bordered">
+        <thead className="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Country</th>
+            <th>City</th>
+            <th>Location Code</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {locations.map((loc) => (
+            <tr key={loc.id}>
+              <td>{loc.name}</td>
+              <td>{loc.country}</td>
+              <td>{loc.city}</td>
+              <td>{loc.locationCode}</td>
+              <td>
+                <button
+                  className="btn btn-warning btn-sm me-2"
+                  onClick={() => openEditModal(loc)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => handleDelete(loc.id)}
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
       {/* Edit Modal */}
       {showEditModal && (
-        <div className="modal">
-          <h3>Edit Location</h3>
-          <input
-            type="text"
-            name="name"
-            value={editLocation.name}
-            onChange={(e) => setEditLocation({ ...editLocation, name: e.target.value })}
-            placeholder="Name"
-            required
-          />
-          <input
-            type="text"
-            name="country"
-            value={editLocation.country}
-            onChange={(e) => setEditLocation({ ...editLocation, country: e.target.value })}
-            placeholder="Country"
-            required
-          />
-          <input
-            type="text"
-            name="city"
-            value={editLocation.city}
-            onChange={(e) => setEditLocation({ ...editLocation, city: e.target.value })}
-            placeholder="City"
-            required
-          />
-          <input
-            type="text"
-            name="locationCode"
-            value={editLocation.locationCode}
-            onChange={(e) => setEditLocation({ ...editLocation, locationCode: e.target.value })}
-            placeholder="Location Code"
-            required
-          />
-          <button onClick={handleUpdate}>Save</button>
-          <button onClick={closeEditModal}>Cancel</button>
+        <div className="modal show d-block" tabIndex="-1">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Edit Location</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={closeEditModal}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <input
+                  type="text"
+                  className="form-control mb-3"
+                  placeholder="Name"
+                  value={editLocation.name}
+                  onChange={(e) =>
+                    setEditLocation({ ...editLocation, name: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  className="form-control mb-3"
+                  placeholder="Country"
+                  value={editLocation.country}
+                  onChange={(e) =>
+                    setEditLocation({ ...editLocation, country: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  className="form-control mb-3"
+                  placeholder="City"
+                  value={editLocation.city}
+                  onChange={(e) =>
+                    setEditLocation({ ...editLocation, city: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Location Code"
+                  value={editLocation.locationCode}
+                  onChange={(e) =>
+                    setEditLocation({ ...editLocation, locationCode: e.target.value })
+                  }
+                />
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleUpdate}
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={closeEditModal}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
