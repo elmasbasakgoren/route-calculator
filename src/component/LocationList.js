@@ -13,6 +13,13 @@ const LocationList = () => {
   const [editLocation, setEditLocation] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
 
+  const [filters, setFilters] = useState({
+    name: "",
+    country: "",
+    city: "",
+    locationCode: "",
+  });
+
   useEffect(() => {
     fetchLocations();
   }, []);
@@ -67,6 +74,19 @@ const LocationList = () => {
     setEditLocation(null);
     setShowEditModal(false);
   };
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prevFilters) => ({ ...prevFilters, [name]: value }));
+  };
+
+  const filteredLocations = locations.filter(
+    (loc) =>
+      loc.name.toLowerCase().includes(filters.name.toLowerCase()) &&
+      loc.country.toLowerCase().includes(filters.country.toLowerCase()) &&
+      loc.city.toLowerCase().includes(filters.city.toLowerCase()) &&
+      loc.locationCode.toLowerCase().includes(filters.locationCode.toLowerCase())
+  );
 
   return (
     <div className="container mt-4">
@@ -125,15 +145,55 @@ const LocationList = () => {
       <table className="table table-bordered">
         <thead className="table-light">
           <tr>
-            <th>Name</th>
-            <th>Country</th>
-            <th>City</th>
-            <th>Location Code</th>
+            <th>
+              Name
+              <input
+                type="text"
+                className="form-control mt-2"
+                placeholder="Filter by Name"
+                name="name"
+                value={filters.name}
+                onChange={handleFilterChange}
+              />
+            </th>
+            <th>
+              Country
+              <input
+                type="text"
+                className="form-control mt-2"
+                placeholder="Filter by Country"
+                name="country"
+                value={filters.country}
+                onChange={handleFilterChange}
+              />
+            </th>
+            <th>
+              City
+              <input
+                type="text"
+                className="form-control mt-2"
+                placeholder="Filter by City"
+                name="city"
+                value={filters.city}
+                onChange={handleFilterChange}
+              />
+            </th>
+            <th>
+              Location Code
+              <input
+                type="text"
+                className="form-control mt-2"
+                placeholder="Filter by Location Code"
+                name="locationCode"
+                value={filters.locationCode}
+                onChange={handleFilterChange}
+              />
+            </th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {locations.map((loc) => (
+          {filteredLocations.map((loc) => (
             <tr key={loc.id}>
               <td>{loc.name}</td>
               <td>{loc.country}</td>

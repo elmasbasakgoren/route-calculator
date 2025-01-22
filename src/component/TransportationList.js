@@ -19,6 +19,12 @@ const TransportationList = () => {
   const [editTransportation, setEditTransportation] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
 
+  const [filters, setFilters] = useState({
+    type: "",
+    origin: "",
+    destination: "",
+  });
+
   useEffect(() => {
     fetchTransportations();
     fetchLocations();
@@ -102,6 +108,17 @@ const TransportationList = () => {
     }
   };
 
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prevFilters) => ({ ...prevFilters, [name]: value }));
+  };
+
+  const filteredTransportations = transportations.filter((t) =>
+    (filters.type === "" || t.type.toLowerCase().includes(filters.type.toLowerCase())) &&
+    (filters.origin === "" || t.origin.toLowerCase().includes(filters.origin.toLowerCase())) &&
+    (filters.destination === "" || t.destination.toLowerCase().includes(filters.destination.toLowerCase()))
+  );
+
   return (
     <div className="container mt-4">
       <h2 className="mb-4">Transportations</h2>
@@ -175,14 +192,44 @@ const TransportationList = () => {
       <table className="table table-bordered">
         <thead className="table-light">
           <tr>
-            <th>Type</th>
-            <th>Origin</th>
-            <th>Destination</th>
+            <th>
+              Type
+              <input
+                type="text"
+                className="form-control mt-2"
+                placeholder="Filter by Type"
+                name="type"
+                value={filters.type}
+                onChange={handleFilterChange}
+              />
+            </th>
+            <th>
+              Origin
+              <input
+                type="text"
+                className="form-control mt-2"
+                placeholder="Filter by Origin"
+                name="origin"
+                value={filters.origin}
+                onChange={handleFilterChange}
+              />
+            </th>
+            <th>
+              Destination
+              <input
+                type="text"
+                className="form-control mt-2"
+                placeholder="Filter by Destination"
+                name="destination"
+                value={filters.destination}
+                onChange={handleFilterChange}
+              />
+            </th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {transportations.map((t) => (
+          {filteredTransportations.map((t) => (
             <tr key={t.id}>
               <td>{t.type}</td>
               <td>{t.origin}</td>
@@ -296,4 +343,3 @@ const TransportationList = () => {
 };
 
 export default TransportationList;
-

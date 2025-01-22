@@ -109,8 +109,7 @@ const RouteCalculator = () => {
                   className="list-group-item list-group-item-action"
                   style={{ cursor: "pointer" }}
                   onClick={() => setSelectedRoute(route)}
-                >
-                  via {route[0].origin}
+                >                  via {route[0].type}
                 </li>
               ))}
             </ul>
@@ -119,28 +118,28 @@ const RouteCalculator = () => {
 
         {/* Visualize Route */}
         <div className="col-md-6">
-          {selectedRoute && (
-            <div className="p-4 border rounded bg-light">
-              <h4>Detailed</h4>
-              <div
-                className="d-flex align-items-center justify-content-start"
-                style={{ whiteSpace: "nowrap", overflowX: "auto" }}
-              >
-                {selectedRoute.map((segment, idx) => (
-                  <React.Fragment key={idx}>
-                    <span className="text-primary fw-bold">{segment.origin}</span>
+  {selectedRoute && (
+    <div className="p-4 border rounded bg-light">
+      <h4>Detailed</h4>
+      <div
+        className="d-flex flex-wrap align-items-center justify-content-start"
+        style={{ lineHeight: "1.5", gap: "10px" }}
+      >
+        {selectedRoute.map((segment, idx) => (
+          <React.Fragment key={idx}>
+            <span className="text-primary fw-bold">{segment.origin}</span>
+            <span className="mx-2">via {segment.type}</span>
+            <span className="mx-2">➡</span>
+            {idx === selectedRoute.length - 1 && (
+              <span className="mx-2 text-success fw-bold">{segment.destination}</span>
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  )}
+</div>
 
-                    <span className="mx-2">➡</span>
-                    {idx === selectedRoute.length - 1 && (
-                      <span className="mx-2 text-success fw-bold">{segment.destination}</span>
-
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
       </div>
     </div >
   );
