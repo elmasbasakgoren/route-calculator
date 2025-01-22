@@ -1,34 +1,49 @@
-import React from "react";
-import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
-import TransportationList from "./component/TransportationList";
+import React, { useState } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 import LocationList from "./component/LocationList";
-import RouteCalculator from "./component/RouteCalculator";
-import "./App.css"; // CSS dosyası
+import TransportationList from "./component/TransportationList"
+import RouteCalculator from "./component/RouteCalculator"
 
 const App = () => {
+  const [activePage, setActivePage] = useState("Home");
+
+  const pages = {
+    Locations: <LocationList />,
+    Transportations: <TransportationList />,
+    Routes: <RouteCalculator />,
+  };
+
   return (
-    <Router>
-      <div>
-        <nav style={{ display: "flex", justifyContent: "center", gap: "20px", margin: "20px 0" }}>
-          <Link to="/locations" className="nav-link">
-            Locations
-          </Link>
-          <Link to="/transportations" className="nav-link">
-            Transportations
-          </Link>
-          <Link to="/routes" className="nav-link">
-            Routes
-          </Link>
+    <div className="d-flex vh-100 flex-column">
+      {/* Header */}
+      <header className="bg-primary text-white text-left py-3">
+        <h1>Route Finder App</h1>
+      </header>
+
+      <div className="d-flex flex-grow-1">
+        {/* Sidebar Navbar */}
+        <nav className="bg-light border-right p-3" style={{ width: "250px" }}>
+          <ul className="nav flex-column">
+            {Object.keys(pages).map((page) => (
+              <li key={page} className="nav-item">
+                <button
+                  className={`nav-link btn btn-link text-start ${activePage === page ? "active text-primary" : ""
+                    }`}
+                  onClick={() => setActivePage(page)}
+                >
+                  {page}
+                </button>
+              </li>
+            ))}
+          </ul>
         </nav>
 
-        <Routes>
-          <Route path="/locations" element={<LocationList />} />
-          <Route path="/transportations" element={<TransportationList />} />
-          <Route path="/routes" element={<RouteCalculator />} />
-          <Route path="/" element={<h2>Welcome to the Application</h2>} />
-        </Routes>
+        {/* Main Content */}
+        <main className="flex-grow-1 p-4">
+          {pages[activePage]}
+        </main>
       </div>
-    </Router>
+    </div>
   );
 };
 

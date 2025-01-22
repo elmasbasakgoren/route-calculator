@@ -6,6 +6,7 @@ import {
   updateTransportation,
   getLocations,
 } from "../services/api";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const TransportationList = () => {
   const [transportations, setTransportations] = useState([]);
@@ -15,15 +16,20 @@ const TransportationList = () => {
     originId: "",
     destinationId: "",
   });
-  const [editTransportation, setEditTransportation] = useState(null); // Güncellenmekte olan transportation
-  const [showEditModal, setShowEditModal] = useState(false); // Modal görünürlüğü
+  const [editTransportation, setEditTransportation] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  const [filters, setFilters] = useState({
+    type: "",
+    origin: "",
+    destination: "",
+  });
 
   useEffect(() => {
     fetchTransportations();
     fetchLocations();
   }, []);
 
-  // Transportation verilerini al
   const fetchTransportations = async () => {
     try {
       const response = await getTransportations();
@@ -34,7 +40,6 @@ const TransportationList = () => {
     }
   };
 
-  // Lokasyon verilerini al
   const fetchLocations = async () => {
     try {
       const response = await getLocations();
@@ -45,7 +50,6 @@ const TransportationList = () => {
     }
   };
 
-  // Yeni transportation ekle
   const handleAddTransportation = async (e) => {
     e.preventDefault();
     try {
@@ -58,7 +62,6 @@ const TransportationList = () => {
     }
   };
 
-  // Transportation sil
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this transportation?")) return;
     try {
@@ -70,7 +73,6 @@ const TransportationList = () => {
     }
   };
 
-  // Transportation düzenleme modalını aç
   const openEditModal = (transportation) => {
     const origin = locations.find((loc) => loc.name === transportation.origin);
     const destination = locations.find((loc) => loc.name === transportation.destination);
@@ -85,13 +87,11 @@ const TransportationList = () => {
     setShowEditModal(true);
   };
 
-  // Modalı kapat
   const closeEditModal = () => {
     setEditTransportation(null);
     setShowEditModal(false);
   };
 
-  // Transportation güncelle
   const handleUpdate = async () => {
     try {
       await updateTransportation(editTransportation.id, {
@@ -108,81 +108,29 @@ const TransportationList = () => {
     }
   };
 
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prevFilters) => ({ ...prevFilters, [name]: value }));
+  };
+
+  const filteredTransportations = transportations.filter((t) =>
+    (filters.type === "" || t.type.toLowerCase().includes(filters.type.toLowerCase())) &&
+    (filters.origin === "" || t.origin.toLowerCase().includes(filters.origin.toLowerCase())) &&
+    (filters.destination === "" || t.destination.toLowerCase().includes(filters.destination.toLowerCase()))
+  );
+
   return (
-    <div>
-      <h2>Transportations</h2>
+    <div className="container mt-4">
+      <h2 className="mb-4">Transportations</h2>
 
-      {/* Transportation Ekleme Formu */}
-      <form onSubmit={handleAddTransportation}>
-        <select
-          name="type"
-          value={newTransportation.type}
-          onChange={(e) => setNewTransportation({ ...newTransportation, type: e.target.value })}
-          required
-        >
-          <option value="" disabled>
-            Select Type
-          </option>
-          <option value="FLIGHT">Flight</option>
-          <option value="BUS">Bus</option>
-          <option value="UBER">Uber</option>
-          <option value="SUBWAY">Subway</option>
-        </select>
-        <select
-          name="originId"
-          value={newTransportation.originId}
-          onChange={(e) => setNewTransportation({ ...newTransportation, originId: e.target.value })}
-          required
-        >
-          <option value="" disabled>
-            Select Origin
-          </option>
-          {locations.map((loc) => (
-            <option key={loc.id} value={loc.id}>
-              {loc.name}
-            </option>
-          ))}
-        </select>
-        <select
-          name="destinationId"
-          value={newTransportation.destinationId}
-          onChange={(e) =>
-            setNewTransportation({ ...newTransportation, destinationId: e.target.value })
-          }
-          required
-        >
-          <option value="" disabled>
-            Select Destination
-          </option>
-          {locations.map((loc) => (
-            <option key={loc.id} value={loc.id}>
-              {loc.name}
-            </option>
-          ))}
-        </select>
-        <button type="submit">Add Transportation</button>
-      </form>
-
-      {/* Transportation Listesi */}
-      <ul>
-        {transportations.map((t) => (
-          <li key={t.id}>
-            {`${t.type} from ${t.origin} to ${t.destination}`}
-            <button onClick={() => openEditModal(t)}>Edit</button>
-            <button onClick={() => handleDelete(t.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-
-      {/* Edit Modal */}
-      {showEditModal && (
-        <div className="modal">
-          <h3>Edit Transportation</h3>
+      {/* Add Transportation Form */}
+      <form className="row g-3 mb-4 align-items-end" onSubmit={handleAddTransportation}>
+        <div className="col-md-3">
           <select
-            name="type"
-            value={editTransportation.type}
+            className="form-select"
+            value={newTransportation.type}
             onChange={(e) =>
-              setEditTransportation({ ...editTransportation, type: e.target.value })
+              setNewTransportation({ ...newTransportation, type: e.target.value })
             }
             required
           >
@@ -194,11 +142,13 @@ const TransportationList = () => {
             <option value="UBER">Uber</option>
             <option value="SUBWAY">Subway</option>
           </select>
+        </div>
+        <div className="col-md-3">
           <select
-            name="originId"
-            value={editTransportation.originId}
+            className="form-select"
+            value={newTransportation.originId}
             onChange={(e) =>
-              setEditTransportation({ ...editTransportation, originId: e.target.value })
+              setNewTransportation({ ...newTransportation, originId: e.target.value })
             }
             required
           >
@@ -211,11 +161,13 @@ const TransportationList = () => {
               </option>
             ))}
           </select>
+        </div>
+        <div className="col-md-3">
           <select
-            name="destinationId"
-            value={editTransportation.destinationId}
+            className="form-select"
+            value={newTransportation.destinationId}
             onChange={(e) =>
-              setEditTransportation({ ...editTransportation, destinationId: e.target.value })
+              setNewTransportation({ ...newTransportation, destinationId: e.target.value })
             }
             required
           >
@@ -228,8 +180,162 @@ const TransportationList = () => {
               </option>
             ))}
           </select>
-          <button onClick={handleUpdate}>Save</button>
-          <button onClick={closeEditModal}>Cancel</button>
+        </div>
+        <div className="col-md-3">
+          <button type="submit" className="btn btn-primary w-100">
+            Add Transportation
+          </button>
+        </div>
+      </form>
+
+      {/* Transportation Table */}
+      <table className="table table-bordered">
+        <thead className="table-light">
+          <tr>
+            <th>
+              Type
+              <input
+                type="text"
+                className="form-control mt-2"
+                placeholder="Filter by Type"
+                name="type"
+                value={filters.type}
+                onChange={handleFilterChange}
+              />
+            </th>
+            <th>
+              Origin
+              <input
+                type="text"
+                className="form-control mt-2"
+                placeholder="Filter by Origin"
+                name="origin"
+                value={filters.origin}
+                onChange={handleFilterChange}
+              />
+            </th>
+            <th>
+              Destination
+              <input
+                type="text"
+                className="form-control mt-2"
+                placeholder="Filter by Destination"
+                name="destination"
+                value={filters.destination}
+                onChange={handleFilterChange}
+              />
+            </th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredTransportations.map((t) => (
+            <tr key={t.id}>
+              <td>{t.type}</td>
+              <td>{t.origin}</td>
+              <td>{t.destination}</td>
+              <td>
+                <button
+                  className="btn btn-warning btn-sm me-2"
+                  onClick={() => openEditModal(t)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => handleDelete(t.id)}
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="modal show d-block" tabIndex="-1">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Edit Transportation</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={closeEditModal}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <select
+                  className="form-select mb-3"
+                  value={editTransportation.type}
+                  onChange={(e) =>
+                    setEditTransportation({ ...editTransportation, type: e.target.value })
+                  }
+                  required
+                >
+                  <option value="" disabled>
+                    Select Type
+                  </option>
+                  <option value="FLIGHT">Flight</option>
+                  <option value="BUS">Bus</option>
+                  <option value="UBER">Uber</option>
+                  <option value="SUBWAY">Subway</option>
+                </select>
+                <select
+                  className="form-select mb-3"
+                  value={editTransportation.originId}
+                  onChange={(e) =>
+                    setEditTransportation({ ...editTransportation, originId: e.target.value })
+                  }
+                  required
+                >
+                  <option value="" disabled>
+                    Select Origin
+                  </option>
+                  {locations.map((loc) => (
+                    <option key={loc.id} value={loc.id}>
+                      {loc.name}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="form-select"
+                  value={editTransportation.destinationId}
+                  onChange={(e) =>
+                    setEditTransportation({ ...editTransportation, destinationId: e.target.value })
+                  }
+                  required
+                >
+                  <option value="" disabled>
+                    Select Destination
+                  </option>
+                  {locations.map((loc) => (
+                    <option key={loc.id} value={loc.id}>
+                      {loc.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleUpdate}
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={closeEditModal}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
